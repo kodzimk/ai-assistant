@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { ContactProps, GlobalContext } from '../../types/contact';
 import styles from './baseline.module.css';
 
- const Baseline: React.FC<ContactProps> = ({ name, lastMessage, profilePicture }) => {
+ const Baseline: React.FC<ContactProps> = ({ name, lastMessage, profilePicture, messages }) => {
 
   return (
     <div className={styles.contact}>

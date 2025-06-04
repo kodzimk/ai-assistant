@@ -2,12 +2,11 @@ import React, { useContext } from 'react';
 import { ContactProps, GlobalContext } from '../../types/contact';
 import styles from './Contact.module.css';
 
-export const Contact: React.FC<ContactProps> = ({ name, lastMessage, profilePicture }) => {
+export const Contact: React.FC<ContactProps> = ({ name, lastMessage, profilePicture, messages }) => {
   const { contact, setContact } = useContext(GlobalContext);
 
   const handleClick = () => {
-    setContact({isOpened: true, contact: {name, lastMessage, profilePicture}});
-    console.log(contact);
+    setContact({isOpened: true, contact: {name, lastMessage, profilePicture, messages}});
   }
 
   return (

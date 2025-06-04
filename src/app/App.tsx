@@ -3,49 +3,69 @@ import { useState } from "react";
 import { Routes, Route, Link, isCookie } from "react-router-dom";
 import ContactList from "../components/ContactList/ContactList";
 import "../shared/default.css";
-import { GlobalContext } from "../types/contact";
+import { GlobalContext, ContactProps, ChatMessage } from "../types/contact";
 import Baseline from "../components/Baseline/baseline";
 import { Contact } from "../components/Contact/Contact";
 import Chat from "../components/Chat/chat";
 import CreateContact from "../components/CreateContact/CreateContact";
 
-const initialContacts = [
+const initialContacts: ContactProps[] = [
   {
     name: "gemini-1.5-flash",
     lastMessage: "-----",
-    profilePicture: "../public/image/GeminiAI.png"
+    profilePicture: "/image/GeminiAI.png",
+    messages: [] as ChatMessage[],
+    type: 'ai'
   },
   {
     name: "gemini-2.0-flash-lite",
     lastMessage: "-----",
-     profilePicture: "../public/image/GeminiAI.png"
+    profilePicture: "/image/GeminiAI.png",
+    messages: [] as ChatMessage[],
+    type: 'ai'
   }
 ]
 
 
 function App() {
-  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
-  const [contact, setContact] = useState({isOpened: false, contact: null});
+  const [contacts, setContacts] = useState<ContactProps[]>(() => {
+    // Load contacts from localStorage on initial render
+    const savedContacts = localStorage.getItem('contacts');
+    console.log(savedContacts);
+    return savedContacts ? JSON.parse(savedContacts) : initialContacts;
+  });
+  const [contact, setContact] = useState<{isOpened: boolean, contact: ContactProps | null}>({isOpened: false, contact: null});
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Save contacts to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
   function onClose()
   {
     setIsModalOpen(false);
-    
-    console.log('sada');
   }
 
-  function onCreateContact(name)
-  {
+  function onCreateContact(name: string, type: 'ai' | 'person') {
     setIsModalOpen(false);
-    setContacts([...contacts,{name: name, lastMessage: "-----", profilePicture: "../public/image/GeminiAI.png"}]);
+    const newContact: ContactProps = {
+      name: name,
+      lastMessage: "-----",
+      profilePicture: type === 'ai' ? "/image/GeminiAI.png" : "/image/default-avatar.png",
+      messages: [] as ChatMessage[],
+      type: type
+    };
+    setContacts([...contacts, newContact]);
   }
+
 
   return (
     <GlobalContext.Provider value={{contact, setContact, isModalOpen, setIsModalOpen}}>
     <div className="body">
-     <ContactList contacts={contacts} />
-     <CreateContact isOpen={isModalOpen} onClose={onClose} onCreateContact={onCreateContact} />
+
+      <ContactList contacts={contacts} />
+      <CreateContact isOpen={isModalOpen} onClose={onClose} onCreateContact={onCreateContact} />
   
 
      {contact.contact ? 
@@ -55,8 +75,9 @@ function App() {
            name={contact.contact.name}
            lastMessage={contact.contact.lastMessage}
            profilePicture={contact.contact.profilePicture}
+           messages={contact.contact.messages}
          />
-         <Chat/>
+         <Chat contact={contact.contact} setContacts={setContacts} contacts={contacts}/>
        </div>
         : 
        null}

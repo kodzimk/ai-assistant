@@ -6,7 +6,6 @@ import { GlobalContext } from '../../types/contact';
 import { useContext } from 'react';
 
 export default function ContactList({ contacts }: ContactListProps) {
-  const { isOpened, setOpened } = useContext(GlobalContext);
   const { isModalOpen, setIsModalOpen } = useContext(GlobalContext);
 
   function handlePlusClick() {
@@ -27,6 +26,7 @@ export default function ContactList({ contacts }: ContactListProps) {
             name={contact.name}
             lastMessage={contact.lastMessage}
             profilePicture={contact.profilePicture}
+            messages={contact.messages}
           />
         ))}
       </div>

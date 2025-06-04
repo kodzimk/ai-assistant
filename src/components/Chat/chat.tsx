@@ -1,43 +1,71 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import styles from './chat.module.css';
 import { Message } from '../Message/Message';
 import { generateContent } from "../../shared/API/model";
-import { GlobalContext } from '../../types/contact';
+import { GlobalContext, ContactProps, ChatMessage } from '../../types/contact';
 
 // I love Typescript, why JS even exist in our world and why just couldnt integrate data typing in JS iteslf wtf
-interface ChatMessage {
-  id: number;
-  text: string;
-  timestamp: string;
-  isSent: boolean;
+interface ChatProps {
+  contact: ContactProps;
+  setContacts: React.Dispatch<React.SetStateAction<ContactProps[]>>;
+  contacts: ContactProps[];
 }
 
-const Chat = () => {
-    const { contact } = useContext(GlobalContext);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-
-  ]);
+const Chat: React.FC<ChatProps> = ({ contact, setContacts, contacts }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>(contact.messages);
   const [newMessage, setNewMessage] = useState('');
+
+ 
+
+  useEffect(() => {
+    setMessages(contact.messages);
+  }, [contact.messages]);
+
+  useEffect(() => {
+    localStorage.setItem(`messages_${contact.name}`, JSON.stringify(messages));
+ }, [messages]);
+
+
 
   const handleSend = async () => {
     if (newMessage.trim()) {
-      const message: ChatMessage = {
+      // Use local messages state for ID and updates
+      const userMessage: ChatMessage = {
         id: messages.length + 1,
         text: newMessage,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isSent: true
       };
-      setMessages([...messages, message]);
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
       setNewMessage('');
-
-      const response = await generateContent({question: newMessage, model: contact.contact.name});
+  
+      // Update parent contacts state with new messages
+      setContacts(
+        contacts.map(c =>
+          c.name === contact.name
+            ? { ...c, messages: updatedMessages, lastMessage: newMessage }
+            : c
+        )
+      );
+  
+      const response = await generateContent({ question: newMessage, model: contact.name });
       const aiMessage: ChatMessage = {
-        id: messages.length + 2,
+        id: updatedMessages.length + 1,
         text: response ?? '',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isSent: false
       };
-      setMessages(prev => [...prev, aiMessage]);
+      const finalMessages = [...updatedMessages, aiMessage];
+      setMessages(finalMessages);
+  
+      setContacts(
+        contacts.map(c =>
+          c.name === contact.name
+            ? { ...c, messages: finalMessages, lastMessage: response ?? '' }
+            : c
+        )
+      );
       setNewMessage('');
     }
   };
