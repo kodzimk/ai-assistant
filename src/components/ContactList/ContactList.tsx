@@ -17,7 +17,7 @@ export default function ContactList({ contacts }: ContactListProps) {
     <div className={styles.contactList}>
       <header className={styles.header}>
         <h1>Contacts</h1>
-        <img src="../public/image/Plus.png" alt="logo" className={styles.plus} onClick={handlePlusClick}/>
+        <img src="/image/Plus.png" alt="logo" className={styles.plus} onClick={handlePlusClick}/>
       </header>
       <div className={styles.list}>
         {contacts.map((contact) => (
