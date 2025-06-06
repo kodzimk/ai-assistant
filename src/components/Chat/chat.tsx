@@ -3,6 +3,7 @@ import styles from './chat.module.css';
 import { Message } from '../Message/Message';
 import { generateContent } from "../../shared/API/model";
 import { GlobalContext, ContactProps, ChatMessage } from '../../types/contact';
+import { useQuery } from '@tanstack/react-query';
 
 // I love Typescript, why JS even exist in our world and why just couldnt integrate data typing in JS iteslf wtf
 interface ChatProps {
@@ -24,7 +25,11 @@ const Chat: React.FC<ChatProps> = ({ contact, setContacts, contacts }) => {
   useEffect(() => {
     localStorage.setItem(`messages_${contact.name}`, JSON.stringify(messages));
  }, [messages]);
-
+ 
+ const {data} = useQuery({
+  queryKey: ['todos', newMessage],
+  queryFn: () => generateContent({question: newMessage, model: contact.name}),
+ })
 
 
   const handleSend = async () => {
@@ -49,7 +54,7 @@ const Chat: React.FC<ChatProps> = ({ contact, setContacts, contacts }) => {
         )
       );
   
-      const response = await generateContent({ question: newMessage, model: contact.name });
+      const response = JSON.stringify(data);
       const aiMessage: ChatMessage = {
         id: updatedMessages.length + 1,
         text: response ?? '',

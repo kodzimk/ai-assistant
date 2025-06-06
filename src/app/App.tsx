@@ -8,6 +8,7 @@ import Baseline from "../components/Baseline/baseline";
 import { Contact } from "../components/Contact/Contact";
 import Chat from "../components/Chat/chat";
 import CreateContact from "../components/CreateContact/CreateContact";
+import { useQueryClient } from "@tanstack/react-query";
 
 const initialContacts: ContactProps[] = [
   {
@@ -85,5 +86,6 @@ function App() {
     </GlobalContext.Provider>
   );
 }
+
 
 export default App;
